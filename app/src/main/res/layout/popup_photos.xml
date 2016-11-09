@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    android:background="#E0EEE0"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:paddingTop="16dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingBottom="16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<android.support.v7.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="10dp"
+    app:cardCornerRadius="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <TextView
+        android:clickable="true"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="从手机中选择"
+        android:textSize="30sp"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fromPhone"/>
+    <TextView
+        android:clickable="true"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="拍照"
+        android:textSize="30sp"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        android:id="@+id/takephotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:clickable="true"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:id="@+id/cancle"
+        android:text="取消"
+        android:textSize="30sp"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
+</RelativeLayout>
