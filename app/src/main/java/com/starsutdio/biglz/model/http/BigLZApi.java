@@ -50,7 +50,7 @@ public interface BigLZApi {
     @POST("user/logout/")
     Call<ResponseBody> logout(@Header("CheckCode") String check);
 
-
+    @Multipart
     @POST("passages/post/")
     Call<ResponseBody> post(@Header("acckey") String acckey,@Body RequestBody body);
 }

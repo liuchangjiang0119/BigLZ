@@ -24,5 +24,8 @@ public class UserContract {
 
     public interface View extends BaseView<Presenter>{
 
+        void showSuccessDialog();
+        void showFailureDialog();
+
     }
 }

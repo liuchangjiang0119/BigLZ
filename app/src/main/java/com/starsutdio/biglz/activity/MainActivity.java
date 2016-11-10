@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -70,10 +71,12 @@ public class MainActivity extends AppCompatActivity
     FloatingActionButton fab;
     @BindView(R.id.nav_view)
     NavigationView mNavigationView;
-
+    @BindView(R.id.tablayout)
+    TabLayout mTabLayout;
 
     private SharedPreferences mPreferences;
     private SharedPreferences.Editor mEditor;
+    private String acckey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,37 +85,54 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         test_btn.setOnClickListener(this);
         mPreferences = getSharedPreferences("userinfo",Context.MODE_PRIVATE);
-        String accesskey = mPreferences.getString("accesskey",null);
+        acckey = mPreferences.getString("accesskey",null);
+
+        initDrawLayout();
+        initTabLayout();
 
 
+    }
 
-//        String url = "http://10.0.0.13:8081/api/";
-//        Retrofit retrofit =new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
-//                .baseUrl(url).build();
-//
-//        BigLZApi bigLZApi = retrofit.create(BigLZApi.class);
-//
-//        Call<ResponseBody> call = bigLZApi.register("","username","email","password","abcd");
-//        call.enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                try {
-//                    Log.d("-------------",response.body().string());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                t.printStackTrace();
-//            }
-//        });
+    void initTabLayout(){
+        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
 
+        mTabLayout.addTab(mTabLayout.newTab().setIcon(R.drawable.ic_subject_black_24dp));
+        mTabLayout.addTab(mTabLayout.newTab().setIcon(R.drawable.ic_explore_black_24dp));
+        mTabLayout.addTab(mTabLayout.newTab().setIcon(R.drawable.ic_notifications_black_24dp));
+        mTabLayout.addTab(mTabLayout.newTab().setIcon(R.drawable.ic_person_black_24dp));
+        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                switch (position){
+                    case 0:
 
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    default:
+                        break;
+                }
+            }
 
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
 
+            }
 
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+    }
+
+    void initDrawLayout(){
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,12 +156,10 @@ public class MainActivity extends AppCompatActivity
         TextView me_text = (TextView)nav_header_view.findViewById(R.id.me_text);
         login_text.setOnClickListener(this);
         register_text.setOnClickListener(this);
-        if (accesskey!=null){
+        if (acckey!=null){
             mLayout.setVisibility(View.GONE);
             me_text.setVisibility(View.VISIBLE);
         }
-
-
     }
 
 //    void initPopupWindow(Boolean hasLogin){{
@@ -177,8 +195,8 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.test_btn:
-
-
+                File file = new File(Environment.getExternalStorageDirectory().getPath()+"/DCIM/Camera/1.jpg");
+                if (file!=null) Log.d("---------------",file.getAbsolutePath());
                 break;
             case R.id.login_text:
                 Intent login_intent =  new Intent(MainActivity.this,LoginActivity.class);

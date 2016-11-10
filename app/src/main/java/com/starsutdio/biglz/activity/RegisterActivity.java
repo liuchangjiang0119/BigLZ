@@ -72,4 +72,14 @@ public class RegisterActivity extends AppCompatActivity implements UserContract.
                 break;
         }
     }
+
+    @Override
+    public void showFailureDialog() {
+
+    }
+
+    @Override
+    public void showSuccessDialog() {
+
+    }
 }

@@ -124,11 +124,16 @@ public class UserPresenter implements UserContract.Presenter {
 
     @Override
     public void imgupload(List<MultipartBody.Part> list) {
+
         Call<ResponseBody> imgCall = getApi().uploadImg(list);
         imgCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-
+                try {
+                    Log.d("----------",response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -142,16 +147,21 @@ public class UserPresenter implements UserContract.Presenter {
     @Override
     public void post(String acckey,JsonObject jsonObject) {
         body = RequestBody.create(MediaType.parse("application/json;charset=utf-8"),jsonObject.toString());
+
         Call<ResponseBody> passageCall = getApi().post(acckey,body);
         passageCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-
+                try {
+                    Log.d("--------------",response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                t.printStackTrace();
             }
         });
 

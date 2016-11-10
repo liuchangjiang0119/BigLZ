@@ -1,5 +1,6 @@
 package com.starsutdio.biglz.activity;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,12 +13,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ListPopupWindow;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -32,10 +36,13 @@ import com.starsutdio.biglz.activity.adapter.PopupWindowListAdapter;
 import com.starsutdio.biglz.contract.UserContract;
 import com.starsutdio.biglz.model.http.BigLZApi;
 import com.starsutdio.biglz.presenter.UserPresenter;
+import com.starsutdio.biglz.utils.BitmapUtil;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,17 +77,25 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
 
     private String title,content;
     private String uid,createTime;
-    private String acckey;
+    private String acckey = "";
+    private String [] delete = {"删除"};
     private HashMap<String,List<String>> image_map;
-    private List<String> parentList;
-    private List<String> image_path;
-    private List<String> top_image_list;
-    private Map<String,RequestBody> map;
-    private List<MultipartBody.Part> mList;
+    private List<String> mList;
+
+
     private final static int SELECT_CODE = 1;
+    private final static int TAKE_PHOTO = 2;
     private List<Bitmap> list;
     private UserPresenter mPresenter;
     private GridViewAdapter mAdapter;
+    private Bitmap bitmap;
+    private ListPopupWindow mListPopupWindow;
+    private File mFile;
+    private RequestBody mRequestBody;
+    private MultipartBody.Part mPart;
+    private List<MultipartBody.Part> mPartList;
+    private String imagename;
+    private final static String PATH = Environment.getExternalStorageDirectory().getPath()+"/DCIM/Camera/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,25 +103,31 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
         ButterKnife.bind(this);
         fab.setOnClickListener(this);
 
-//        String base_url = "http://10.0.0.15:8081/api/";
-//        File file = new File("/storage/emulated/0/Download/u=4155302816,1201715785&fm=21&gp=0.jpg");
-//        File file1 = new File("/storage/emulated/0/Download/503008.png");
-//        if (file1==null) Log.d("------------","file null");
-//        RequestBody requestFile1 = RequestBody.create(MediaType.parse("multipart/form-data"),file1);
-//        MultipartBody.Part body1 = MultipartBody.Part.createFormData("imgupload[]",file1.getName(),requestFile1);
-//        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"),file);
-//        MultipartBody.Part body = MultipartBody.Part.createFormData("imgupload[]",file.getName(),requestFile);
-//        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("imgupload",file.getName(),requestFile)
-//                .addFormDataPart("imgupload",file1.getName(),requestFile1);
-////        map.put("imgupload"+0+"\"; filename=\""+file.getName(),requestFile);
-////        map.put("imgupload"+1+"\"; filename=\""+file1.getName(),requestFile1);
-//        mList.add(body1);
-//        mList.add(body);
         mPresenter = new UserPresenter(this);
         list = new ArrayList<>();
+        mList = new ArrayList<>();
 
-        mAdapter = new GridViewAdapter(this,list);
+        mAdapter = new GridViewAdapter(this);
         gridView.setAdapter(mAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> view, View view1, int i, long l) {
+                if (i ==0){
+                    showPopupWindow();
+                }
+            }
+        });
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> view, View view1, int i, long l) {
+                if (i!=0){
+                    deletePopupWindow(i);
+                    mListPopupWindow.setAnchorView(view1);
+                    mListPopupWindow.show();
+                }
+                return false;
+            }
+        });
 
 
     }
@@ -157,6 +178,10 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
         takephoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                startActivityForResult(intent,TAKE_PHOTO);
+
 
             }
         });
@@ -171,15 +196,50 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (data!=null){
         if (requestCode == SELECT_CODE){
+
             String image_path = getImagepath(data.getData());
+            mList.add(image_path);
             addImg(image_path);
             
+        }
+        if (requestCode == TAKE_PHOTO) {
+            FileOutputStream fos = null;
+            Bundle bundle = data.getExtras();
+            Bitmap bitmap_tmp = (Bitmap) bundle.get("data");
+            File file = new File(PATH);
+            if (!file.exists()){
+                file.mkdir();
+            }
+            imagename = PATH+System.currentTimeMillis()+".jpg";
+            try {
+                fos = new FileOutputStream(imagename);
+                bitmap_tmp.compress(Bitmap.CompressFormat.JPEG,100,fos);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }finally {
+
+
+                try {
+                    fos.flush();
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            mList.add(imagename);
+            addImg(imagename);
+        }
+
+        }else {
+            Log.d("-------------","data null");
         }
     }
 
     public String getImagepath(Uri image_uri){
-        Cursor cursor = getContentResolver().query(image_uri,null,null,null,null);
+        String [] filePathColumns = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(image_uri, filePathColumns,null,null,null);
         cursor.moveToFirst();
         String image_path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
         cursor.close();
@@ -187,6 +247,7 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
         return image_path;
     }
     public void postPassage(){
+
         title = title_edit.getText().toString();
         content = content_edit.getText().toString();
         createTime = System.currentTimeMillis()+"";
@@ -198,12 +259,58 @@ public class WriteArticleActivity extends AppCompatActivity implements View.OnCl
         jsonObject.addProperty("content",content);
         jsonObject.add("imglist",jsonArray);
         jsonObject.add("detail",detail);
+        imgUpload();
         mPresenter.post(acckey,jsonObject);
+        mPresenter.imgupload(mPartList);
+
     }
     public void addImg(String imgpath){
+        bitmap = BitmapUtil.decodeBitmapFromFile(imgpath,100,100);
+        if (!list.contains(bitmap)) {
+            list.add(bitmap);
+            mAdapter.setImageList(list);
+        }
 
     }
 
+    public void deleteImg(int position){
+        list.remove(position-1);
+        mAdapter.setImageList(list);
+    }
+
+    public void deletePopupWindow(final int position){
+        mListPopupWindow = new ListPopupWindow(this);
+        mListPopupWindow.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,delete));
+        mListPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> view, View view1, int i, long l) {
+                deleteImg(position);
+                mListPopupWindow.dismiss();
+            }
+        });
+    }
+
+    public void imgUpload(){
+        mPartList = new ArrayList<>();
+                for (int i=0;i<mList.size();i++){
+                    mFile = new File(mList.get(i));
+                    mRequestBody = RequestBody.create(MediaType.parse("Multipart/form-data"),mFile);
+                    mPart = MultipartBody.Part.createFormData("imgupload[]",mFile.getName(),mRequestBody);
+                    mPartList.add(mPart);
+                }
+
+
+    }
+
+    @Override
+    public void showSuccessDialog() {
+
+    }
+
+    @Override
+    public void showFailureDialog() {
+
+    }
 
     //    void getImageFromLocal(){
 //                int position =0;

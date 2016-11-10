@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.starsutdio.biglz.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,11 +21,16 @@ import java.util.List;
 public class GridViewAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater inflater;
-    private List<Bitmap> mBitmapList;
-    public GridViewAdapter(Context context,List<Bitmap> list){
+    private List<Bitmap> mBitmapList = new ArrayList<>();
+    public GridViewAdapter(Context context){
         mContext = context;
-        mBitmapList = list;
+
         inflater = LayoutInflater.from(mContext);
+    }
+
+    public void setImageList(List<Bitmap> list){
+        mBitmapList = list;
+        this.notifyDataSetChanged();
     }
     @Override
     public int getCount() {
@@ -47,7 +53,11 @@ public class GridViewAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.gridview_item,null);
         }
         ImageView imageView = (ImageView)view.findViewById(R.id.grid_image);
-        if (i == 0) imageView.setImageResource(R.drawable.ic_add_24dp);
+        if (i == 0) {
+            imageView.setImageResource(R.drawable.ic_add_24dp);
+        }else {
+            imageView.setImageBitmap(mBitmapList.get(i-1));
+        }
 
 
         return view;

@@ -12,12 +12,15 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:fitsSystemWindows="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context="com.starsutdio.biglz.activity.WriteArticleActivity">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <EditText
+
             android:id="@+id/title_edit"
             android:hint="在这输入标题"
             android:layout_width="match_parent"
